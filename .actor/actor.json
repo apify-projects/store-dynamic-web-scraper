@@ -1,0 +1,9 @@
+{
+	"actorSpecification": 1,
+	"name": "store-dynamic-web-scraper",
+	"title": "Dynamic Web Scraper",
+	"description": "Dynamic crawling the websites based on the website content",
+	"version": "0.0",
+	"input": "./input_schema.json",
+	"dockerfile": "./Dockerfile"
+}

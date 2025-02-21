@@ -1,0 +1,32 @@
+{
+    "title": "Dynamic Web Scraper",
+    "type": "object",
+    "schemaVersion": 1,
+    "properties": {
+        "startSources": {
+            "title": "Start Sources",
+            "type": "array",
+            "description": "Sources to start with, could be .",
+            "editor": "stringList",
+            "prefill": ["Lucerna Bar Cafe, Prague"],
+            "minItems": 1
+        },
+        "prompt": {
+            "title": "Prompt",
+            "type": "string",
+            "editor": "textarea",
+            "description": "Prompt to evaluate on content.",
+            "prefill": "Look for the food menu items and if you find it look for a chicken option"
+        },
+        "maxDepth": {
+            "title": "Max Depth",
+            "type": "integer",
+            "description": "Maximum depth to scrape.",
+            "default": 3
+        }
+    },
+    "required": [
+        "startSources",
+        "prompt"
+    ]
+}
