@@ -1,7 +1,7 @@
 import { Actor } from 'apify';
 import { HttpCrawler, log, RequestOptions } from 'crawlee';
 import { type Input, type PageContext } from './types.js';
-import { callGPT } from './callGPT.js';
+import { callLlm } from './call-llm';
 import { callRagStandby, generateRagUrl } from './tools.js';
 import { DEFAULT_MODEL } from './constants.js';
 
@@ -61,7 +61,7 @@ const httpCrawler = new HttpCrawler({
             };
 
             // Call ChatGPT and ask if it's able to provide a solution
-            const chatGptResponse = await callGPT(prompt, markdown, inputSource, pageContext, multipleTargets, model);
+            const chatGptResponse = await callLlm(prompt, markdown, inputSource, pageContext, multipleTargets, model);
             await Actor.charge({ eventName: EVENTS_NAME.GPT_API_CALL, count: 1 });
 
             // ---- yes -> Information provided -> put into Dataset.
@@ -69,12 +69,16 @@ const httpCrawler = new HttpCrawler({
                 const alreadyPushed = pushedUrls[inputSource].includes(url);
                 if (!alreadyPushed) {
                     pushedUrls[inputSource].push(url);
+                    const lines = markdown.split('\n');
+                    const contentMarkdown = chatGptResponse.contentLines
+                        ? lines.slice(chatGptResponse.contentLines.start, chatGptResponse.contentLines.end + 1).join('\n')
+                        : markdown;
                     await crawler.pushData({
                         url,
                         inputSource,
                         depth: pageContext.depth,
                         response: chatGptResponse.response,
-                        contentMarkdown: markdown,
+                        contentMarkdown,
                     });
                     await Actor.charge({ eventName: EVENTS_NAME.PUSHING_DATASET, count: 1 });
                 }
