@@ -1,5 +1,6 @@
 import OpenAI from 'openai';
 import { Actor } from 'apify';
+import { jsonrepair } from 'jsonrepair';
 import type { PageContext } from './types.js';
 
 const openai = new OpenAI({
@@ -33,14 +34,12 @@ export async function callLlm(
 
     const numberedMarkdown = markdownString.split('\n').map((line, i) => `${i}: ${line}`).join('\n');
 
-    const contentLinesInstruction = ` Also return "contentLines": { "start": <line_number>, "end": <line_number> } with the 0-indexed line range of the main content in the numbered document, excluding navigation, ads, and footer.`;
+    const contentLinesInstruction = ` Also include "contentLines": { "start": <line_number>, "end": <line_number> } with the 0-indexed line range of the main content in the numbered document, excluding navigation, ads, and footer. Do NOT include the article text, body, or any large text field in the JSON response — use contentLines to reference the content by line numbers only.`;
 
     const positiveResponseStructure = multipleTargets
-        ? `If you are able to respond, return the result in a JSON format with these properties:`
-            + ` "answered": true, "response": (your response goes here), "bestUrls": (array of additional relevant URLs to continue exploring from this page).`
+        ? `If you are able to respond, return a JSON object with "answered": true, any additional fields the user-prompt asks for as top-level properties (do NOT nest them inside a "response" field), and "bestUrls": (array of additional relevant URLs to continue exploring from this page).`
             + contentLinesInstruction
-        : `If you are able to respond, return the result in a JSON format with these properties:`
-            + ` "answered": true, "response": (your response goes here).`
+        : `If you are able to respond, return a JSON object with "answered": true and any additional fields the user-prompt asks for as top-level properties (do NOT nest them inside a "response" field).`
             + contentLinesInstruction;
 
     const negativeResponseStructure = `If you are not able to respond, you should provide a list of text document absolute URLs (extracted from the markdown)`
@@ -65,12 +64,23 @@ export async function callLlm(
     });
     const raw = completion.choices[0].message.content;
     if (!raw) throw new Error('Empty response from LLM');
-    return JSON.parse(raw);
+    try {
+        return JSON.parse(jsonrepair(raw));
+    } catch (e) {
+        const key = `llm-parse-error-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+        await Actor.setValue(key, {
+            url: pageContext.url,
+            model,
+            error: (e as Error).message,
+            rawLlmResponse: raw,
+        });
+        throw e;
+    }
 }
 
 export interface GPTResponse {
     answered: boolean,
-    response?: string,
     bestUrls?: string[],
-    contentLines?: { start: number, end: number }
+    contentLines?: { start: number, end: number },
+    [key: string]: unknown,  // user-prompt fields (title, publishedAt, etc.) land here directly
 }

@@ -50,6 +50,10 @@ const httpCrawler = new HttpCrawler({
 
         await Promise.all(results.map(async (result) => {
             const { markdown, metadata } = result;
+            if (!markdown) {
+                log.warning(`Skipping result with no markdown content for source: ${inputSource}`);
+                return;
+            }
             const { url } = metadata;
 
             const pageContext: PageContext = {
@@ -61,24 +65,25 @@ const httpCrawler = new HttpCrawler({
             };
 
             // Call ChatGPT and ask if it's able to provide a solution
-            const chatGptResponse = await callLlm(prompt, markdown, inputSource, pageContext, multipleTargets, model);
+            const llmResponse = await callLlm(prompt, markdown, inputSource, pageContext, multipleTargets, model);
             await Actor.charge({ eventName: EVENTS_NAME.GPT_API_CALL, count: 1 });
 
             // ---- yes -> Information provided -> put into Dataset.
-            if (chatGptResponse.answered) {
+            if (llmResponse.answered) {
                 const alreadyPushed = pushedUrls[inputSource].includes(url);
                 if (!alreadyPushed) {
                     pushedUrls[inputSource].push(url);
                     const lines = markdown.split('\n');
-                    const contentMarkdown = chatGptResponse.contentLines
-                        ? lines.slice(chatGptResponse.contentLines.start, chatGptResponse.contentLines.end + 1).join('\n')
+                    const contentMarkdown = llmResponse.contentLines
+                        ? lines.slice(llmResponse.contentLines.start, llmResponse.contentLines.end + 1).join('\n')
                         : markdown;
+                    const { answered, bestUrls, contentLines, ...responseFields } = llmResponse;
                     await crawler.pushData({
                         url,
                         inputSource,
                         depth: pageContext.depth,
-                        response: chatGptResponse.response,
-                        contentMarkdown,
+                        ...responseFields,
+                        contentMarkdown: contentMarkdown?.trim(),
                     });
                     await Actor.charge({ eventName: EVENTS_NAME.PUSHING_DATASET, count: 1 });
                 }
@@ -95,15 +100,21 @@ const httpCrawler = new HttpCrawler({
 
             // ---- no --> ChatGPT: What would be the best next links?
             //             enqueue them.
-            const { bestUrls = [] } = chatGptResponse;
+            const { bestUrls = [] } = llmResponse;
 
             // Update the url to enqueue in future crawls
             if (depth > 0 && (multipleTargets || !solvedInputState.includes(inputSource))) {
                 for (const bestUrl of bestUrls) {
-                    const isAlreadyEnqueued = urlsState[inputSource].requests.some((requestA) => requestA.url === bestUrl);
+                    let absoluteUrl: string;
+                    try {
+                        absoluteUrl = new URL(bestUrl, pageContext.url).href;
+                    } catch {
+                        continue; // skip unparseable URLs
+                    }
+                    const isAlreadyEnqueued = urlsState[inputSource].requests.some((requestA) => requestA.url === absoluteUrl);
                     if (!isAlreadyEnqueued) {
                         urlsState[inputSource].requests.push({
-                            url: bestUrl,
+                            url: absoluteUrl,
                             skipNavigation: true,
                             userData: {
                                 maxDepth: depth - 1,

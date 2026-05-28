@@ -9,6 +9,7 @@
 	"dependencies": {
 		"apify": "^3.3.2",
 		"crawlee": "^3.11.5",
+		"jsonrepair": "^3.14.0",
 		"openai": "^4.85.2"
 	},
 	"devDependencies": {
