@@ -37,21 +37,21 @@
             "editor": "select",
             "enum": [
                 "openrouter/auto",
+                "google/gemini-2.5-flash-lite",
                 "openai/gpt-4o-mini",
-                "google/gemini-2.5-flash-preview",
                 "google/gemini-2.0-flash-001",
                 "anthropic/claude-haiku-4-5",
                 "meta-llama/llama-4-scout"
             ],
             "enumTitles": [
                 "Auto (OpenRouter selects best)",
+                "Gemini 2.5 Flash Lite (Google)",
                 "GPT-4o Mini (OpenAI)",
-                "Gemini 2.5 Flash Preview (Google)",
                 "Gemini 2.0 Flash (Google)",
                 "Claude Haiku 4.5 (Anthropic)",
                 "Llama 4 Scout (Meta)"
             ],
-            "default": "google/gemini-2.0-flash-001"
+            "default": "google/gemini-2.5-flash-lite"
         }
     },
     "required": [
