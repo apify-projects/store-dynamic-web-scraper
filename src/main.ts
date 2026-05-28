@@ -25,7 +25,6 @@ const pushedUrls = await Actor.useState<Record<string, string[]>>('pushedUrls', 
 
 const httpCrawler = new HttpCrawler({
     requestHandlerTimeoutSecs: 60,
-    maxConcurrency: 2,
     requestHandler: async ({ request, crawler }) => {
         const { maxDepth: depth = maxDepthInput, inputSource } = request.userData;
         if (!multipleTargets && solvedInputState.includes(inputSource)) {
