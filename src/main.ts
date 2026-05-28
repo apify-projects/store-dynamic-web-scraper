@@ -66,7 +66,7 @@ const httpCrawler = new HttpCrawler({
 
             // Call ChatGPT and ask if it's able to provide a solution
             const llmResponse = await callLlm(prompt, markdown, inputSource, pageContext, multipleTargets, model);
-            await Actor.charge({ eventName: EVENTS_NAME.GPT_API_CALL, count: 1 });
+            // await Actor.charge({ eventName: EVENTS_NAME.GPT_API_CALL, count: 1 });
 
             // ---- yes -> Information provided -> put into Dataset.
             if (llmResponse.answered) {
