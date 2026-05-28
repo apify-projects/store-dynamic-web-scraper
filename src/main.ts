@@ -54,7 +54,7 @@ const httpCrawler = new HttpCrawler({
                 title: metadata.title,
                 description: metadata.description,
                 url,
-                depth: maxDepthInput - depth,   // 0 = start page, increases with each hop
+                depth: maxDepthInput - depth, // 0 = start page, increases with each hop
                 startSource: inputSource,
             };
 
@@ -72,6 +72,7 @@ const httpCrawler = new HttpCrawler({
                         inputSource,
                         depth: pageContext.depth,
                         response: chatGptResponse.response,
+                        contentMarkdown: markdown,
                     });
                     await Actor.charge({ eventName: EVENTS_NAME.PUSHING_DATASET, count: 1 });
                 }
