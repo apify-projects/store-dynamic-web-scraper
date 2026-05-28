@@ -70,7 +70,7 @@ const httpCrawler = new HttpCrawler({
                     await crawler.pushData({
                         url,
                         inputSource,
-                        depth: maxDepthInput - depth,
+                        depth: pageContext.depth,
                         response: chatGptResponse.response,
                     });
                     await Actor.charge({ eventName: EVENTS_NAME.PUSHING_DATASET, count: 1 });
@@ -82,10 +82,7 @@ const httpCrawler = new HttpCrawler({
                 }
                 // multipleTargets: fall through to process bestUrls returned alongside the answer
             } else if (depth === 0) {
-                await crawler.pushData({
-                    inputSource,
-                    response: null,
-                });
+                // Max depth reached without a result — skip silently, no information value.
                 return;
             }
 
