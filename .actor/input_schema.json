@@ -29,6 +29,29 @@
             "type": "boolean",
             "description": "Continue exploring after each found result to collect multiple matches per source (e.g. all news articles about a topic).",
             "default": false
+        },
+        "model": {
+            "title": "LLM Model",
+            "type": "string",
+            "description": "LLM model to use via OpenRouter. See https://openrouter.ai/models for full list.",
+            "editor": "select",
+            "enum": [
+                "openrouter/auto",
+                "openai/gpt-4o-mini",
+                "google/gemini-2.5-flash-preview",
+                "google/gemini-2.0-flash-001",
+                "anthropic/claude-haiku-4-5",
+                "meta-llama/llama-4-scout"
+            ],
+            "enumTitles": [
+                "Auto (OpenRouter selects best)",
+                "GPT-4o Mini (OpenAI)",
+                "Gemini 2.5 Flash Preview (Google)",
+                "Gemini 2.0 Flash (Google)",
+                "Claude Haiku 4.5 (Anthropic)",
+                "Llama 4 Scout (Meta)"
+            ],
+            "default": "google/gemini-2.0-flash-001"
         }
     },
     "required": [

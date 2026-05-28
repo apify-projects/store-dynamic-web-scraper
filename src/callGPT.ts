@@ -1,12 +1,17 @@
 import OpenAI from 'openai';
+import { Actor } from 'apify';
 import type { PageContext } from './types.js';
 
 const openai = new OpenAI({
-    apiKey: process.env.API_KEY,
+    baseURL: 'https://openrouter.apify.actor/api/v1',
+    apiKey: 'no-key-required-but-must-not-be-empty',
+    defaultHeaders: {
+        Authorization: `Bearer ${Actor.getEnv().token}`,
+    },
 });
 
 /**
- * Requests to ChatGPT to perform an analysis on the provided webpage (passed in a markdown formatted string)
+ * Requests an LLM via OpenRouter to perform an analysis on the provided webpage (passed in a markdown formatted string)
  */
 export async function callGPT(
     prompt: string,
@@ -14,6 +19,7 @@ export async function callGPT(
     source: string,
     pageContext: PageContext,
     multipleTargets: boolean,
+    model: string,
 ): Promise<GPTResponse> {
     const promptPresentation = `Find a respond for this user-prompt: "${prompt}" in a close relation to this source ${source}.`;
 
@@ -47,10 +53,10 @@ export async function callGPT(
 
     const completion = await openai.chat.completions.create({
         messages: [{ role: 'user', content }],
-        model: 'gpt-4o-mini',
+        model,
         store: false,
     });
-    if (!completion.choices[0].message.content) throw new Error('Empty response from GPT');
+    if (!completion.choices[0].message.content) throw new Error('Empty response from LLM');
     const gptResponse = completion.choices[0].message.content!.split('```')[1].slice(4).trim(); /// content is "```json CONTENT ```"
     return (JSON.parse(gptResponse));
 }

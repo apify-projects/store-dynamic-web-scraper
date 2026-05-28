@@ -26,6 +26,7 @@ export interface Input {
     prompt: string;
     maxDepth?: number;
     multipleTargets?: boolean;
+    model?: string;
 }
 
 export interface PageContext {

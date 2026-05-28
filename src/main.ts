@@ -3,6 +3,7 @@ import { HttpCrawler, log, RequestOptions } from 'crawlee';
 import { type Input, type PageContext } from './types.js';
 import { callGPT } from './callGPT.js';
 import { callRagStandby, generateRagUrl } from './tools.js';
+import { DEFAULT_MODEL } from './constants.js';
 
 const EVENTS_NAME = {
     START_ACTOR: 'START_ACTOR',
@@ -17,6 +18,7 @@ const {
     prompt,
     maxDepth: maxDepthInput = 3,
     multipleTargets = false,
+    model = DEFAULT_MODEL,
 } = await Actor.getInput<Input>() ?? {} as Input;
 
 const urlsState = await Actor.useState<Record<string, { requests: RequestOptions[], index: number }>>('urls', {});
@@ -59,7 +61,7 @@ const httpCrawler = new HttpCrawler({
             };
 
             // Call ChatGPT and ask if it's able to provide a solution
-            const chatGptResponse = await callGPT(prompt, markdown, inputSource, pageContext, multipleTargets);
+            const chatGptResponse = await callGPT(prompt, markdown, inputSource, pageContext, multipleTargets, model);
             await Actor.charge({ eventName: EVENTS_NAME.GPT_API_CALL, count: 1 });
 
             // ---- yes -> Information provided -> put into Dataset.
