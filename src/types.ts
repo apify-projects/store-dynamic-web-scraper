@@ -25,4 +25,13 @@ export interface Input {
     startSources: string[];
     prompt: string;
     maxDepth?: number;
+    multipleTargets?: boolean;
+}
+
+export interface PageContext {
+    title: string;
+    description: string;
+    url: string;
+    depth: number;  // hops from start: 0 = start/home page, 1 = first hop, etc.
+    startSource: string;
 }

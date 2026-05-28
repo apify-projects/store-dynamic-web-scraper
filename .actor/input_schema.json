@@ -23,6 +23,12 @@
             "type": "integer",
             "description": "Maximum depth to scrape.",
             "default": 3
+        },
+        "multipleTargets": {
+            "title": "Multiple Targets",
+            "type": "boolean",
+            "description": "Continue exploring after each found result to collect multiple matches per source (e.g. all news articles about a topic).",
+            "default": false
         }
     },
     "required": [
