@@ -22,7 +22,8 @@ export async function callGPT(
 - Page title: ${pageContext.title}
 - Page description: ${pageContext.description}
 - Navigation depth: ${pageContext.depth} (0 = start/home page, higher = deeper into the site)
-- Start source: ${pageContext.startSource}`;
+- Start source: ${pageContext.startSource}
+- Current datetime (UTC): ${new Date().toISOString()}`;
 
     const positiveResponseStructure = multipleTargets
         ? `If you are able to respond, return the result in a JSON format with these properties:`
