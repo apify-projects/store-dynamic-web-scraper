@@ -1,7 +1,7 @@
 import { Actor } from 'apify';
 import { HttpCrawler, log, RequestOptions } from 'crawlee';
 import { type Input, type PageContext } from './types.js';
-import { callLlm } from './call-llm';
+import { callLlm } from './call-llm.js';
 import { callRagStandby, generateRagUrl } from './tools.js';
 import { DEFAULT_MODEL } from './constants.js';
 

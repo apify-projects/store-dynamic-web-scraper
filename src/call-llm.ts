@@ -61,10 +61,11 @@ export async function callLlm(
         messages: [{ role: 'user', content }],
         model,
         store: false,
+        response_format: { type: 'json_object' },
     });
-    if (!completion.choices[0].message.content) throw new Error('Empty response from LLM');
-    const gptResponse = completion.choices[0].message.content!.split('```')[1].slice(4).trim(); /// content is "```json CONTENT ```"
-    return (JSON.parse(gptResponse));
+    const raw = completion.choices[0].message.content;
+    if (!raw) throw new Error('Empty response from LLM');
+    return JSON.parse(raw);
 }
 
 export interface GPTResponse {
